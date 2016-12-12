@@ -69,7 +69,8 @@ abstract class AbstractSnappyOutputStream
         this.buffer = recycler.allocOutputBuffer(blockSize);
         this.outputBuffer = recycler.allocEncodingBuffer(maxCompressedLength(blockSize));
 
-        writeHeader(out);
+        // this header thing just does not work in Hadoop because you do not write a continuous piece but chunks of values or key-value pairs.
+//        writeHeader(out);
     }
 
     /**

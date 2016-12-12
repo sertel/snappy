@@ -91,16 +91,26 @@ abstract class AbstractSnappyInputStream
         this.recycler = BufferRecycler.instance();
         allocateBuffersBasedOnSize(maxBlockSize + 5);
         this.frameHeader = new byte[frameHeaderSize];
+        this.expectedHeader = expectedHeader;
+    }
 
-        // stream must begin with stream header
-        byte[] actualHeader = new byte[expectedHeader.length];
+    private byte[] expectedHeader = null;
+    private boolean wasHeaderChecked = false;
+    private void checkHeader() throws IOException {
+        if(!wasHeaderChecked) {
+            // stream must begin with stream header
+            byte[] actualHeader = new byte[expectedHeader.length];
 
-        int read = readBytes(in, actualHeader, 0, actualHeader.length);
-        if (read < expectedHeader.length) {
-            throw new EOFException("encountered EOF while reading stream header");
-        }
-        if (!Arrays.equals(expectedHeader, actualHeader)) {
-            throw new IOException("invalid stream header");
+            int read = readBytes(in, actualHeader, 0, actualHeader.length);
+            if (read < expectedHeader.length) {
+                throw new EOFException("encountered EOF while reading stream header");
+            }
+            if (!Arrays.equals(expectedHeader, actualHeader)) {
+                throw new IOException("invalid stream header");
+            }
+            wasHeaderChecked = true;
+        }else{
+            // check already performed
         }
     }
 
@@ -114,6 +124,7 @@ abstract class AbstractSnappyInputStream
     public int read()
             throws IOException
     {
+//        checkHeader();
         if (closed) {
             return -1;
         }
@@ -127,6 +138,8 @@ abstract class AbstractSnappyInputStream
     public int read(byte[] output, int offset, int length)
             throws IOException
     {
+        // this header thing just does not work in Hadoop because you do not write a continuous piece but chunks of values or key-value pairs.
+//        checkHeader();
         checkNotNull(output, "output is null");
         checkPositionIndexes(offset, offset + length, output.length);
         if (closed) {
@@ -216,7 +229,8 @@ abstract class AbstractSnappyInputStream
         }
 
         if (!readBlockHeader()) {
-            eof = true;
+            // Hadoop gives you input buffers that it refills
+//            eof = true;
             return false;
         }
 
