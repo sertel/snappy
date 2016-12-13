@@ -137,10 +137,11 @@ abstract class AbstractSnappyOutputStream
             throws IOException
     {
         if (closed) {
-            throw new IOException("Stream is closed");
+//            throw new IOException("Stream is closed");
+        }else {
+            flushBuffer();
+            out.flush();
         }
-        flushBuffer();
-        out.flush();
     }
 
     @Override

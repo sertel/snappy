@@ -17,6 +17,7 @@
  */
 package org.iq80.snappy;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.compress.*;
 
 import java.io.IOException;
@@ -59,6 +60,7 @@ public class HadoopSnappyCodec
   public CompressionOutputStream createOutputStream(OutputStream outputStream, Compressor compressor)
           throws IOException {
     assert compressor == _compressor;
+    System.out.println("HERE: Creating Snappy output stream ... ");
     return createOutputStream(outputStream);
   }
 
@@ -210,6 +212,11 @@ public class HadoopSnappyCodec
     public void end() {
       throw new UnsupportedOperationException("Snappy Compressor is not supported");
     }
+
+    @Override
+    public void reinit(Configuration configuration) {
+      // nothing
+    }
   }
 
   private static class VoidDecompressor implements Decompressor {
@@ -241,6 +248,11 @@ public class HadoopSnappyCodec
 
     @Override
     public int decompress(byte[] b, int off, int len) throws IOException {
+      throw new UnsupportedOperationException("Snappy Decompressor is not supported");
+    }
+
+    @Override
+    public int getRemaining() {
       throw new UnsupportedOperationException("Snappy Decompressor is not supported");
     }
 
